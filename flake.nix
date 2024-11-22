@@ -8,10 +8,17 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        # Package up the config files
+
+        # Define runtime dependencies
+        runtimeDeps = with pkgs; [
+          go    # Add Go
+          nodejs  # Add Node.js (includes npm)
+          # any other dependencies you need
+        ];
+
         neovimConfig = pkgs.stdenv.mkDerivation {
           name = "neovim-config";
-          src = ./.; # This looks for config files in current directory
+          src = ./.;
           
           installPhase = ''
             mkdir -p $out
@@ -30,36 +37,26 @@
             '';
             packages.myVimPackage = {
               start = with pkgs.vimPlugins; [
-                lazy-nvim
-                telescope-nvim
-                plenary-nvim
-                material-nvim
-                    nvim-lspconfig
-    mason-nvim
-    mason-lspconfig-nvim
-    nvim-cmp
-    cmp-nvim-lsp
-    cmp-buffer
-    cmp-path
-    luasnip
-    cmp_luasnip
+                # your plugins...
               ];
             };
-
-            buildInputs = with pkgs; [
-  lua-language-server
-  nodePackages.pyright
-  nodePackages.typescript-language-server
-  # add other language servers as needed
-];
           };
         };
+
       in {
-        packages.default = nvim-pkg;
+        packages.default = pkgs.symlinkJoin {
+          name = "neovim-wrapped";
+          paths = [ nvim-pkg ] ++ runtimeDeps;  # Include runtime deps in the final package
+          buildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/nvim \
+              --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps}
+          '';
+        };
         
         apps.default = {
           type = "app";
-          program = "${nvim-pkg}/bin/nvim";
+          program = "${self.packages.${system}.default}/bin/nvim";
         };
       }
     );
