@@ -34,6 +34,7 @@
                 telescope-nvim
                 plenary-nvim
                 material-nvim
+                pkgs.go
                 # other plugins...
               ];
             };
