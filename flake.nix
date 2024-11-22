@@ -34,10 +34,24 @@
                 telescope-nvim
                 plenary-nvim
                 material-nvim
-                pkgs.go
-                # other plugins...
+                    nvim-lspconfig
+    mason-nvim
+    mason-lspconfig-nvim
+    nvim-cmp
+    cmp-nvim-lsp
+    cmp-buffer
+    cmp-path
+    luasnip
+    cmp_luasnip
               ];
             };
+
+            buildInputs = with pkgs; [
+  lua-language-server
+  nodePackages.pyright
+  nodePackages.typescript-language-server
+  # add other language servers as needed
+];
           };
         };
       in {
