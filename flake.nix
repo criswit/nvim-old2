@@ -33,6 +33,7 @@
                 lazy-nvim
                 telescope-nvim
                 plenary-nvim
+                material-nvim
                 # other plugins...
               ];
             };
